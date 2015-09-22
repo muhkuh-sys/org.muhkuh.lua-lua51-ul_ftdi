@@ -22,6 +22,9 @@
 
 #include "_ul_ftdi.h"
 
+#include "ftdi.h"
+
+
 
 /* Do not include the EEPROM functions for now. */
 #define WITH_EEPROM_FUNCTIONS 0
@@ -30,14 +33,39 @@
 
 
 // Get number of connected FTDI devices. Also rebuilds device info list.
-static int _ftdi_ndevs(lua_State *L) {
-    DWORD ndevs;
-    FT_STATUS result = FT_CreateDeviceInfoList( &ndevs );
-    if (result != FT_OK) ndevs = 0;
-    lua_pushinteger(L, ndevs);
-    return 1;
+static int _ftdi_ndevs(lua_State *L)
+{
+	struct ftdi_context *ptFtdi;
+	struct ftdi_device_list *ptDeviceList;
+	int iResult;
+	int iNumberOfConnectedDevices;
+
+
+	/* No devices found yet. */
+	iNumberOfConnectedDevices = 0;
+	
+	ptFtdi = ftdi_new();
+	if( ptFtdi!=NULL )
+	{
+		/* FIXME: this is the VID/PID of the NXJTAG module. */
+		iResult = ftdi_usb_find_all(ptFtdi, &ptDeviceList, 0x1939, 0x0023);
+		if( iResult>=0 )
+		{
+			iNumberOfConnectedDevices = iResult;
+			
+			/* Free the device list. */
+			ftdi_list_free(&ptDeviceList);
+		}
+		
+		ftdi_deinit(ptFtdi);
+		ftdi_free(ptFtdi);
+	}
+	
+	lua_pushinteger(L, iNumberOfConnectedDevices);
+	return 1;
 }
 
+#if 0
 // Get information about connected FTDI devices.
 static int _ftdi_devs(lua_State *L) {
     DWORD ndevs;
@@ -249,7 +277,7 @@ static int _ftdi_read(lua_State *L) {
     if (data != NULL) free(data);
     return 1;
 }
-
+#endif
 
 #if WITH_EEPROM_FUNCTIONS!=0
 ///////////////////////////////////////////////////////////////////////////////
@@ -865,27 +893,27 @@ static int _ftdi_write_eep(lua_State *L) {
 
 static const luaL_reg lib__ul_ftdi[] = {
     {"ndevs",      _ftdi_ndevs},
-    {"devs",       _ftdi_devs},
+//    {"devs",       _ftdi_devs},
 
-    {"open",       _ftdi_open},
-    {"close",      _ftdi_close},
+//    {"open",       _ftdi_open},
+//    {"close",      _ftdi_close},
 
-    {"latency",    _ftdi_latency},
-    {"setLatency", _ftdi_setLatency},
+//    {"latency",    _ftdi_latency},
+//    {"setLatency", _ftdi_setLatency},
 
-    {"availRX",    _ftdi_availRX},
-    {"availTX",    _ftdi_availTX},
-    {"flushRX",    _ftdi_flushRX},
-    {"flushTX",    _ftdi_flushTX},
+//    {"availRX",    _ftdi_availRX},
+//    {"availTX",    _ftdi_availTX},
+//    {"flushRX",    _ftdi_flushRX},
+//    {"flushTX",    _ftdi_flushTX},
 
-    {"bm",         _ftdi_bm},
-    {"setBm",      _ftdi_setBm},
+//    {"bm",         _ftdi_bm},
+//    {"setBm",      _ftdi_setBm},
 
-    {"setBaud",    _ftdi_setBaud},
-    {"setDiv",     _ftdi_setDiv},
+//    {"setBaud",    _ftdi_setBaud},
+//    {"setDiv",     _ftdi_setDiv},
 
-    {"write",      _ftdi_write},
-    {"read",       _ftdi_read},
+//    {"write",      _ftdi_write},
+//    {"read",       _ftdi_read},
 
 #if WITH_EEPROM_FUNCTIONS!=0
     {"readEep",    _ftdi_read_eep},
