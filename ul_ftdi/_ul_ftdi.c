@@ -22,6 +22,13 @@
 
 #include "_ul_ftdi.h"
 
+
+/* Do not include the EEPROM functions for now. */
+#define WITH_EEPROM_FUNCTIONS 0
+// #define WITH_EEPROM_FUNCTIONS 1
+
+
+
 // Get number of connected FTDI devices. Also rebuilds device info list.
 static int _ftdi_ndevs(lua_State *L) {
     DWORD ndevs;
@@ -244,6 +251,7 @@ static int _ftdi_read(lua_State *L) {
 }
 
 
+#if WITH_EEPROM_FUNCTIONS!=0
 ///////////////////////////////////////////////////////////////////////////////
 // Read eeprom.
 //   Input: opened device handle.
@@ -852,7 +860,7 @@ static int _ftdi_write_eep(lua_State *L) {
     lua_pushboolean( L, result );
     return 1;
 }        
-
+#endif
 
 
 static const luaL_reg lib__ul_ftdi[] = {
@@ -879,8 +887,10 @@ static const luaL_reg lib__ul_ftdi[] = {
     {"write",      _ftdi_write},
     {"read",       _ftdi_read},
 
+#if WITH_EEPROM_FUNCTIONS!=0
     {"readEep",    _ftdi_read_eep},
     {"writeEep",   _ftdi_write_eep},
+#endif
 
     {NULL, NULL}
 };
