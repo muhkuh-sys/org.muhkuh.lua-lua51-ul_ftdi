@@ -1,0 +1,6 @@
+/build/
+/build_windows32/
+/build_windows64/
+/ivy/dependencies/ant_paths.cmake
+/ivy/dependencies/lib/
+/ivy/dependencies/path.properties
